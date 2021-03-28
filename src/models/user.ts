@@ -32,6 +32,18 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   }
+},
+// Override the returned JSON representation for data returned for this schema
+{
+  toJSON: {
+    transform(doc, ret) {
+      ret.id = ret._id;
+      delete ret._id;
+      delete ret.password; // remove the password field
+      // delete ret.__v  // We instead set versionKey to false below
+    },
+    versionKey: false
+  }
 });
 
 
