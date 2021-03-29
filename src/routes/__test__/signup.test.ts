@@ -1,12 +1,50 @@
-import request from 'supertest';
-import { app } from '../../app';
+import request from "supertest";
+import { app } from "../../app";
 
-it('returns a 201 on successful signup', async () => {
+it("returns a 201 on successful signup", async () => {
   return request(app)
-    .post('/api/users/signup')
+    .post("/api/users/signup")
     .send({
-      email: 'test@test.com',
-      password: 'password'
+      email: "test@test.com",
+      password: "password",
     })
     .expect(201);
+});
+
+it("returns a 400 with an invalid email", async () => {
+  return request(app)
+    .post("/api/users/signup")
+    .send({
+      email: "alskdflaskjfd",
+      password: "password",
+    })
+    .expect(400);
+});
+
+it("returns a 400 with an invalid password", async () => {
+  return request(app) // Either return or await will work with jest
+    .post("/api/users/signup")
+    .send({
+      email: "alskdflaskjfd",
+      password: "p",
+    })
+    .expect(400);
+});
+
+it("returns a 400 with missing email and password", async () => {
+  await request(app)
+    .post("/api/users/signup")
+    .send({
+      email: "test@test.com",
+    })
+    .expect(400);
+
+  await request(app) // Either return or await will work with jest
+    .post("/api/users/signup")
+    .send({
+      password: "alskjdf",
+    })
+    .expect(400);
+
+  await request(app).post("/api/users/signup").send({}).expect(400);
 });
