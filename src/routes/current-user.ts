@@ -5,6 +5,7 @@ import { currentUser } from "@oldledger/common";
 
 const router = express.Router();
 
+// FIXME: This route will return the user in the cookie even when the user session has expired
 router.get(
   "/api/users/currentuser",
   currentUser,
