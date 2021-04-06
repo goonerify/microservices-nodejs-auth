@@ -1,28 +1,27 @@
 import mongoose from "mongoose";
 import { Password } from "../services/password";
 
-// An interface that describes the properties
+// An object that describes the properties
 // that are required to create a new User
 interface UserAttrs {
   email: string;
   password: string;
 }
 
-// An interface that describes the properties
-// that a User Model has
+// A class that provides an interface to the database for reading,
+// creating, querying, updating, deleting records, etc
 interface UserModel extends mongoose.Model<UserDoc> {
   build(attrs: UserAttrs): UserDoc;
 }
 
-// An interface that describes the properties that a
-// User Document has. You can include any properties that
-// you would like to access like createdAt, updatedAt
-// etc that Mongoose adds automatically
+// A class that describes the properties of a User Document/
+// database row that can be accessed when using the model in code
 interface UserDoc extends mongoose.Document {
   email: string;
   password: string;
 }
 
+// An interface that defines the structure of a document, default values, validators, etc.
 const userSchema = new mongoose.Schema(
   {
     email: {
@@ -34,8 +33,9 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
   },
-  // Override the returned JSON representation for data returned for this schema
   {
+    // Override the JSON representation of the serialized user model. Useful for
+    // protecting sensitive information before transferring over HTTP for instance
     toJSON: {
       transform(doc, ret) {
         ret.id = ret._id;
@@ -48,6 +48,7 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+// Pre-save hook to hash a password if the password was updated
 userSchema.pre("save", async function (done) {
   if (this.isModified("password")) {
     const hashed = await Password.toHash(this.get("password"));
@@ -56,13 +57,13 @@ userSchema.pre("save", async function (done) {
   done();
 });
 
+// The statics object allows us to add a new method to the model
 // This custom build function allows type checking on attrs.
-// It will be available on the model if defined on the schema's statics object
 userSchema.statics.build = (attrs: UserAttrs) => {
   return new User(attrs);
 };
 
-// The User mongoose model
+// The model provides us access to the collection (database table), in code
 const User = mongoose.model<UserDoc, UserModel>("User", userSchema);
 
 export { User };
