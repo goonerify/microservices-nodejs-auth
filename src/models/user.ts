@@ -15,7 +15,7 @@ interface UserModel extends mongoose.Model<UserDoc> {
 }
 
 // An interface that describes the properties that a
-// User Document has. You can add any properties that
+// User Document has. You can include any properties that
 // you would like to access like createdAt, updatedAt
 // etc that Mongoose adds automatically
 interface UserDoc extends mongoose.Document {
@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema(
         ret.id = ret._id;
         delete ret._id;
         delete ret.password; // remove the password field
-        // delete ret.__v  // We instead set versionKey to false below
+        // delete ret.__v  // Commented out because we're instead setting versionKey to false below
       },
       versionKey: false,
     },
@@ -56,11 +56,13 @@ userSchema.pre("save", async function (done) {
   done();
 });
 
-// This custom build function allows type checking on attrs
+// This custom build function allows type checking on attrs.
+// It will be available on the model if defined on the schema's statics object
 userSchema.statics.build = (attrs: UserAttrs) => {
   return new User(attrs);
 };
 
+// The User mongoose model
 const User = mongoose.model<UserDoc, UserModel>("User", userSchema);
 
 export { User };
